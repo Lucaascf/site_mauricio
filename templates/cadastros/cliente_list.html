@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Clientes - Gestão Comercial{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Clientes</h1>
+    <a href="{% url 'cadastros:cliente_create' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Novo Cliente
+    </a>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <form method="get" class="d-flex">
+            <input type="text" name="search" class="form-control" placeholder="Buscar por código, razão social, CNPJ ou cidade..." value="{{ search }}">
+            <button type="submit" class="btn btn-outline-secondary ms-2">
+                <i class="fas fa-search"></i> Buscar
+            </button>
+            {% if search %}
+                <a href="{% url 'cadastros:cliente_list' %}" class="btn btn-outline-danger ms-2">
+                    <i class="fas fa-times"></i> Limpar
+                </a>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Razão Social</th>
+                <th>CNPJ</th>
+                <th>Cidade</th>
+                <th>Telefone</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cliente in clientes %}
+            <tr>
+                <td>{{ cliente.cod_cli }}</td>
+                <td>{{ cliente.razao_soc }}</td>
+                <td>{{ cliente.cnpj|default:"-" }}</td>
+                <td>{{ cliente.cidade|default:"-" }}</td>
+                <td>{{ cliente.fone|default:"-" }}</td>
+                <td>
+                    <a href="{% url 'cadastros:cliente_detail' cliente.pk %}" class="btn btn-sm btn-info">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="{% url 'cadastros:cliente_update' cliente.pk %}" class="btn btn-sm btn-warning">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="{% url 'cadastros:cliente_delete' cliente.pk %}" class="btn btn-sm btn-danger">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">Nenhum cliente encontrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if is_paginated %}
+<nav aria-label="Paginação">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}">Primeira</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}">Anterior</a>
+            </li>
+        {% endif %}
+        
+        <li class="page-item active">
+            <span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        </li>
+        
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}">Próxima</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}">Última</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

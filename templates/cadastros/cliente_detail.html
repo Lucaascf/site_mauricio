@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ cliente.razao_soc }} - Gestão Comercial{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Detalhes do Cliente</h1>
+    <div>
+        <a href="{% url 'cadastros:cliente_update' cliente.pk %}" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Editar
+        </a>
+        <a href="{% url 'cadastros:cliente_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> Informações Básicas</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Código:</strong> {{ cliente.cod_cli }}</p>
+                        <p><strong>Razão Social:</strong> {{ cliente.razao_soc }}</p>
+                        <p><strong>CNPJ:</strong> {{ cliente.cnpj|default:"-" }}</p>
+                        <p><strong>Inscrição Estadual:</strong> {{ cliente.insc_rg|default:"-" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Telefone:</strong> {{ cliente.fone|default:"-" }}</p>
+                        <p><strong>Celular 1:</strong> {{ cliente.celular1|default:"-" }}</p>
+                        <p><strong>Celular 2:</strong> {{ cliente.celular2|default:"-" }}</p>
+                        <p><strong>Email:</strong> {{ cliente.email|default:"-" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5><i class="fas fa-map-marker-alt"></i> Endereço</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Endereço:</strong> {{ cliente.endereco|default:"-" }}</p>
+                <p><strong>Bairro:</strong> {{ cliente.bairro|default:"-" }}</p>
+                <p><strong>Cidade:</strong> {{ cliente.cidade|default:"-" }} - {{ cliente.estado|default:"-" }}</p>
+                <p><strong>CEP:</strong> {{ cliente.cep|default:"-" }}</p>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5><i class="fas fa-users"></i> Contatos</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Contato 1:</strong> {{ cliente.contato1|default:"-" }}</p>
+                <p><strong>Contato 2:</strong> {{ cliente.contato2|default:"-" }}</p>
+                <p><strong>Contato 3:</strong> {{ cliente.contato3|default:"-" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-clock"></i> Auditoria</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Criado em:</strong><br>{{ cliente.created_at|date:"d/m/Y H:i" }}</p>
+                <p><strong>Criado por:</strong><br>{{ cliente.created_by|default:"-" }}</p>
+                <p><strong>Atualizado em:</strong><br>{{ cliente.updated_at|date:"d/m/Y H:i" }}</p>
+                <p><strong>Atualizado por:</strong><br>{{ cliente.updated_by|default:"-" }}</p>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5><i class="fas fa-cogs"></i> Ações</h5>
+            </div>
+            <div class="card-body">
+                <a href="{% url 'cadastros:cliente_update' cliente.pk %}" class="btn btn-warning btn-sm d-block mb-2">
+                    <i class="fas fa-edit"></i> Editar Cliente
+                </a>
+                <a href="{% url 'cadastros:cliente_delete' cliente.pk %}" class="btn btn-danger btn-sm d-block">
+                    <i class="fas fa-trash"></i> Remover Cliente
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
