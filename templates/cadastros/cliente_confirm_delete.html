@@ -4,44 +4,125 @@
 
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Remover Cliente</h1>
-    <a href="{% url 'cadastros:cliente_detail' object.pk %}" class="btn btn-secondary">
+    <h1 class="h2">
+        <i class="fas fa-exclamation-triangle text-danger"></i> Remover Cliente
+    </h1>
+    <a href="{% url 'cadastros:cliente_detail' cliente.CodCli %}" class="btn btn-secondary">
         <i class="fas fa-arrow-left"></i> Voltar
     </a>
 </div>
 
 <div class="row justify-content-center">
-    <div class="col-md-6">
+    <div class="col-md-8 col-lg-6">
         <div class="card border-danger">
             <div class="card-header bg-danger text-white">
-                <h5><i class="fas fa-exclamation-triangle"></i> Confirmação de Remoção</h5>
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle"></i> Confirmação de Remoção
+                </h5>
             </div>
             <div class="card-body">
-                <p class="lead">Tem certeza que deseja remover o cliente abaixo?</p>
-                
                 <div class="alert alert-warning">
-                    <strong>{{ object.cod_cli }} - {{ object.razao_soc }}</strong><br>
-                    <small>{{ object.cnpj|default:"" }} - {{ object.cidade|default:"" }}/{{ object.estado|default:"" }}</small>
+                    <h6 class="alert-heading">
+                        <i class="fas fa-info-circle"></i> Você está prestes a remover:
+                    </h6>
+                    <hr>
+                    <p class="mb-0">
+                        <strong>Código:</strong> {{ cliente.CodCli }}<br>
+                        <strong>Razão Social:</strong> {{ cliente.RazaoSoc|default:"Nome não informado" }}<br>
+                        {% if cliente.Cnpj %}<strong>CNPJ:</strong> {{ cliente.Cnpj }}<br>{% endif %}
+                        {% if cliente.Cidade %}<strong>Cidade:</strong> {{ cliente.Cidade }}{% if cliente.Est %}/{{ cliente.Est }}{% endif %}{% endif %}
+                    </p>
                 </div>
                 
                 <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <strong>Atenção:</strong> Esta ação não pode ser desfeita!
+                    <h6 class="alert-heading">
+                        <i class="fas fa-exclamation-triangle"></i> Atenção!
+                    </h6>
+                    <p class="mb-0">
+                        Esta ação <strong>não pode ser desfeita</strong>. Todos os dados relacionados a este cliente serão permanentemente removidos do sistema.
+                    </p>
+                </div>
+
+                <!-- Informações adicionais se necessário -->
+                <div class="mb-3">
+                    <h6>Dados que serão removidos:</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-muted"></i> Informações básicas do cliente</li>
+                        <li><i class="fas fa-check text-muted"></i> Dados de contato</li>
+                        <li><i class="fas fa-check text-muted"></i> Endereço</li>
+                        {% if cliente.Informacao %}
+                        <li><i class="fas fa-check text-muted"></i> Informações adicionais</li>
+                        {% endif %}
+                    </ul>
                 </div>
                 
-                <form method="post">
+                <form method="post" class="mt-4">
                     {% csrf_token %}
-                    <div class="d-flex justify-content-end">
-                        <a href="{% url 'cadastros:cliente_detail' object.pk %}" class="btn btn-secondary me-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{% url 'cadastros:cliente_detail' cliente.CodCli %}" class="btn btn-secondary">
                             <i class="fas fa-times"></i> Cancelar
                         </a>
                         <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-trash"></i> Sim, Remover
+                            <i class="fas fa-trash"></i> Sim, Remover Cliente
                         </button>
                     </div>
                 </form>
             </div>
         </div>
+
+        <!-- Informações de ajuda -->
+        <div class="card mt-3 border-info">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-lightbulb text-info"></i> Precisa de ajuda?
+                </h6>
+                <p class="card-text small text-muted mb-0">
+                    Se você não tem certeza sobre a remoção, pode voltar e verificar os detalhes do cliente antes de prosseguir.
+                    Em caso de dúvidas, entre em contato com o administrador do sistema.
+                </p>
+            </div>
+        </div>
     </div>
 </div>
+
+<style>
+.card-header.bg-danger {
+    border-bottom: 1px solid rgba(0,0,0,.125);
+}
+
+.alert-heading {
+    margin-bottom: 0.5rem;
+}
+
+.list-unstyled li {
+    padding: 0.2rem 0;
+}
+
+.card.border-danger {
+    box-shadow: 0 0.125rem 0.25rem rgba(220, 53, 69, 0.1);
+}
+
+.card.border-info {
+    box-shadow: 0 0.125rem 0.25rem rgba(23, 162, 184, 0.1);
+}
+</style>
+
+<script>
+// Adicionar confirmação extra ao clicar no botão de remover
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteForm = document.querySelector('form[method="post"]');
+    const deleteButton = deleteForm.querySelector('button[type="submit"]');
+    
+    deleteButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Confirmação dupla para ações críticas
+        const confirmed = confirm('ÚLTIMA CONFIRMAÇÃO: Tem certeza absoluta que deseja remover o cliente {{ cliente.CodCli }} - {{ cliente.RazaoSoc }}?\n\nEsta ação NÃO PODE ser desfeita!');
+        
+        if (confirmed) {
+            deleteForm.submit();
+        }
+    });
+});
+</script>
 {% endblock %}

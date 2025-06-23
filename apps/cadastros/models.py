@@ -23,7 +23,7 @@ class Cliente(models.Model):
     
     class Meta:
         db_table = 'cliente'
-        managed = False
+        managed = True
         verbose_name = 'Cliente'
         verbose_name_plural = 'Clientes'
         
@@ -53,7 +53,7 @@ class Fornecedor(models.Model):
     
     class Meta:
         db_table = 'forneced'
-        managed = False
+        managed = True
         verbose_name = 'Fornecedor'
         verbose_name_plural = 'Fornecedores'
         
@@ -70,7 +70,7 @@ class Produto(models.Model):
     
     class Meta:
         db_table = 'produto'
-        managed = False
+        managed = True
         verbose_name = 'Produto'
         verbose_name_plural = 'Produtos'
         
@@ -104,7 +104,7 @@ class Cotacao(models.Model):
     
     class Meta:
         db_table = 'cotacao'
-        managed = False
+        managed = True
         verbose_name = 'Cotação'
         verbose_name_plural = 'Cotações'
         
@@ -155,7 +155,7 @@ class Pedido(models.Model):
     
     class Meta:
         db_table = 'pedido'
-        managed = False
+        managed = True
         verbose_name = 'Pedido'
         verbose_name_plural = 'Pedidos'
         
@@ -203,7 +203,7 @@ class OcorCli(models.Model):
     
     class Meta:
         db_table = 'ocorcli'
-        managed = False
+        managed = True
         verbose_name = 'Ocorrência Cliente'
         verbose_name_plural = 'Ocorrências Clientes'
         
@@ -231,7 +231,7 @@ class OcorFor(models.Model):
     
     class Meta:
         db_table = 'ocorfor'
-        managed = False
+        managed = True
         verbose_name = 'Ocorrência Fornecedor'
         verbose_name_plural = 'Ocorrências Fornecedores'
         
@@ -261,7 +261,7 @@ class OcorCot(models.Model):
     
     class Meta:
         db_table = 'ocorcot'
-        managed = False
+        managed = True
         verbose_name = 'Ocorrência Cotação'
         verbose_name_plural = 'Ocorrências Cotações'
         
@@ -309,7 +309,7 @@ class OcorPedC(models.Model):
     
     class Meta:
         db_table = 'ocorpedc'
-        managed = False
+        managed = True
         verbose_name = 'Ocorrência Pedido Cliente'
         verbose_name_plural = 'Ocorrências Pedidos Clientes'
         
@@ -349,7 +349,7 @@ class OcorPedF(models.Model):
     
     class Meta:
         db_table = 'ocorpedf'
-        managed = False
+        managed = True
         verbose_name = 'Ocorrência Pedido Fornecedor'
         verbose_name_plural = 'Ocorrências Pedidos Fornecedores'
         
@@ -391,7 +391,7 @@ class Usuario(models.Model):
     
     class Meta:
         db_table = 'usuario'
-        managed = False  # Se quiser que o Django não gerencie a tabela
+        managed = True  # Se quiser que o Django não gerencie a tabela
         verbose_name = 'Usuário'
         verbose_name_plural = 'Usuários'
         

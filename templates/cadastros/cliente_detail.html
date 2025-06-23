@@ -1,14 +1,23 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ cliente.razao_soc }} - Gestão Comercial{% endblock %}
+{% block title %}{{ cliente.RazaoSoc|default:"Cliente" }} - Gestão Comercial{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Detalhes do Cliente</h1>
-    <div>
-        <a href="{% url 'cadastros:cliente_update' cliente.pk %}" class="btn btn-warning">
-            <i class="fas fa-edit"></i> Editar
-        </a>
+    <h1 class="h2">
+        <i class="fas fa-user"></i> Detalhes do Cliente
+        <small class="text-muted">{{ cliente.CodCli }}</small>
+    </h1>
+    <div class="btn-toolbar">
+        <div class="btn-group me-2">
+            <a href="{% url 'cadastros:cliente_update' cliente.CodCli %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+            <a href="{% url 'cadastros:cliente_delete' cliente.CodCli %}" class="btn btn-danger"
+               onclick="return confirm('Tem certeza que deseja remover o cliente {{ cliente.CodCli }} - {{ cliente.RazaoSoc }}?')">
+                <i class="fas fa-trash"></i> Remover
+            </a>
+        </div>
         <a href="{% url 'cadastros:cliente_list' %}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Voltar
         </a>
@@ -16,79 +25,239 @@
 </div>
 
 <div class="row">
-    <div class="col-md-8">
-        <div class="card">
+    <div class="col-lg-8">
+        <!-- Informações Básicas -->
+        <div class="card mb-4">
             <div class="card-header">
-                <h5><i class="fas fa-info-circle"></i> Informações Básicas</h5>
+                <h5 class="mb-0"><i class="fas fa-info-circle text-primary"></i> Informações Básicas</h5>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <p><strong>Código:</strong> {{ cliente.cod_cli }}</p>
-                        <p><strong>Razão Social:</strong> {{ cliente.razao_soc }}</p>
-                        <p><strong>CNPJ:</strong> {{ cliente.cnpj|default:"-" }}</p>
-                        <p><strong>Inscrição Estadual:</strong> {{ cliente.insc_rg|default:"-" }}</p>
+                        <dl class="row">
+                            <dt class="col-sm-4">Código:</dt>
+                            <dd class="col-sm-8"><span class="badge bg-primary">{{ cliente.CodCli }}</span></dd>
+                            
+                            <dt class="col-sm-4">Razão Social:</dt>
+                            <dd class="col-sm-8">{{ cliente.RazaoSoc|default:"-" }}</dd>
+                            
+                            <dt class="col-sm-4">CNPJ:</dt>
+                            <dd class="col-sm-8">{{ cliente.Cnpj|default:"-" }}</dd>
+                        </dl>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Telefone:</strong> {{ cliente.fone|default:"-" }}</p>
-                        <p><strong>Celular 1:</strong> {{ cliente.celular1|default:"-" }}</p>
-                        <p><strong>Celular 2:</strong> {{ cliente.celular2|default:"-" }}</p>
-                        <p><strong>Email:</strong> {{ cliente.email|default:"-" }}</p>
+                        <dl class="row">
+                            <dt class="col-sm-4">Inscrição:</dt>
+                            <dd class="col-sm-8">{{ cliente.InscRg|default:"-" }}</dd>
+                            
+                            <dt class="col-sm-4">Email:</dt>
+                            <dd class="col-sm-8">
+                                {% if cliente.Email %}
+                                    <a href="mailto:{{ cliente.Email }}">{{ cliente.Email }}</a>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </dd>
+                        </dl>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="card mt-3">
+        <!-- Endereço -->
+        <div class="card mb-4">
             <div class="card-header">
-                <h5><i class="fas fa-map-marker-alt"></i> Endereço</h5>
+                <h5 class="mb-0"><i class="fas fa-map-marker-alt text-primary"></i> Endereço</h5>
             </div>
             <div class="card-body">
-                <p><strong>Endereço:</strong> {{ cliente.endereco|default:"-" }}</p>
-                <p><strong>Bairro:</strong> {{ cliente.bairro|default:"-" }}</p>
-                <p><strong>Cidade:</strong> {{ cliente.cidade|default:"-" }} - {{ cliente.estado|default:"-" }}</p>
-                <p><strong>CEP:</strong> {{ cliente.cep|default:"-" }}</p>
+                <div class="row">
+                    <div class="col-md-12">
+                        <dl class="row">
+                            <dt class="col-sm-2">Endereço:</dt>
+                            <dd class="col-sm-10">{{ cliente.End|default:"-" }}</dd>
+                            
+                            <dt class="col-sm-2">Bairro:</dt>
+                            <dd class="col-sm-4">{{ cliente.Bairro|default:"-" }}</dd>
+                            
+                            <dt class="col-sm-2">CEP:</dt>
+                            <dd class="col-sm-4">{{ cliente.Cep|default:"-" }}</dd>
+                            
+                            <dt class="col-sm-2">Cidade:</dt>
+                            <dd class="col-sm-4">{{ cliente.Cidade|default:"-" }}</dd>
+                            
+                            <dt class="col-sm-2">Estado:</dt>
+                            <dd class="col-sm-4">{{ cliente.Est|default:"-" }}</dd>
+                        </dl>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="card mt-3">
+        <!-- Contato -->
+        <div class="card mb-4">
             <div class="card-header">
-                <h5><i class="fas fa-users"></i> Contatos</h5>
+                <h5 class="mb-0"><i class="fas fa-phone text-primary"></i> Informações de Contato</h5>
             </div>
             <div class="card-body">
-                <p><strong>Contato 1:</strong> {{ cliente.contato1|default:"-" }}</p>
-                <p><strong>Contato 2:</strong> {{ cliente.contato2|default:"-" }}</p>
-                <p><strong>Contato 3:</strong> {{ cliente.contato3|default:"-" }}</p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-4">Telefone:</dt>
+                            <dd class="col-sm-8">
+                                {% if cliente.Fone %}
+                                    <a href="tel:{{ cliente.Fone }}">{{ cliente.Fone }}</a>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </dd>
+                            
+                            <dt class="col-sm-4">Fax:</dt>
+                            <dd class="col-sm-8">{{ cliente.Fax|default:"-" }}</dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-4">Celular 1:</dt>
+                            <dd class="col-sm-8">
+                                {% if cliente.Celular1 %}
+                                    <a href="tel:{{ cliente.Celular1 }}">{{ cliente.Celular1 }}</a>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </dd>
+                            
+                            <dt class="col-sm-4">Celular 2:</dt>
+                            <dd class="col-sm-8">
+                                {% if cliente.Celular2 %}
+                                    <a href="tel:{{ cliente.Celular2 }}">{{ cliente.Celular2 }}</a>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <!-- Pessoas de Contato -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-users text-primary"></i> Pessoas de Contato</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <dl>
+                            <dt>Contato 1:</dt>
+                            <dd>{{ cliente.Contato1|default:"-" }}</dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-4">
+                        <dl>
+                            <dt>Contato 2:</dt>
+                            <dd>{{ cliente.Contato2|default:"-" }}</dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-4">
+                        <dl>
+                            <dt>Contato 3:</dt>
+                            <dd>{{ cliente.Contato3|default:"-" }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informações Adicionais -->
+        {% if cliente.Informacao %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-sticky-note text-primary"></i> Informações Adicionais</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-0">{{ cliente.Informacao|linebreaks }}</p>
+            </div>
+        </div>
+        {% endif %}
     </div>
 
-    <div class="col-md-4">
-        <div class="card">
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Ações Rápidas -->
+        <div class="card mb-4">
             <div class="card-header">
-                <h5><i class="fas fa-clock"></i> Auditoria</h5>
+                <h5 class="mb-0"><i class="fas fa-cogs text-primary"></i> Ações Rápidas</h5>
             </div>
             <div class="card-body">
-                <p><strong>Criado em:</strong><br>{{ cliente.created_at|date:"d/m/Y H:i" }}</p>
-                <p><strong>Criado por:</strong><br>{{ cliente.created_by|default:"-" }}</p>
-                <p><strong>Atualizado em:</strong><br>{{ cliente.updated_at|date:"d/m/Y H:i" }}</p>
-                <p><strong>Atualizado por:</strong><br>{{ cliente.updated_by|default:"-" }}</p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'cadastros:cliente_update' cliente.CodCli %}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Editar Cliente
+                    </a>
+                    <a href="{% url 'cadastros:cliente_delete' cliente.CodCli %}" class="btn btn-danger"
+                       onclick="return confirm('Tem certeza que deseja remover este cliente?')">
+                        <i class="fas fa-trash"></i> Remover Cliente
+                    </a>
+                    <hr>
+                    <a href="{% url 'cadastros:cliente_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-list"></i> Lista de Clientes
+                    </a>
+                    <a href="{% url 'cadastros:cliente_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Novo Cliente
+                    </a>
+                </div>
             </div>
         </div>
 
-        <div class="card mt-3">
+        <!-- Resumo de Contato -->
+        <div class="card mb-4">
             <div class="card-header">
-                <h5><i class="fas fa-cogs"></i> Ações</h5>
+                <h5 class="mb-0"><i class="fas fa-address-card text-primary"></i> Resumo de Contato</h5>
             </div>
             <div class="card-body">
-                <a href="{% url 'cadastros:cliente_update' cliente.pk %}" class="btn btn-warning btn-sm d-block mb-2">
-                    <i class="fas fa-edit"></i> Editar Cliente
-                </a>
-                <a href="{% url 'cadastros:cliente_delete' cliente.pk %}" class="btn btn-danger btn-sm d-block">
-                    <i class="fas fa-trash"></i> Remover Cliente
-                </a>
+                <address class="mb-0">
+                    <strong>{{ cliente.RazaoSoc|default:"Nome não informado" }}</strong><br>
+                    {% if cliente.End %}{{ cliente.End }}<br>{% endif %}
+                    {% if cliente.Bairro %}{{ cliente.Bairro }}<br>{% endif %}
+                    {% if cliente.Cidade %}
+                        {{ cliente.Cidade }}{% if cliente.Est %} - {{ cliente.Est }}{% endif %}<br>
+                    {% endif %}
+                    {% if cliente.Cep %}{{ cliente.Cep }}<br>{% endif %}
+                    <br>
+                    {% if cliente.Fone %}<i class="fas fa-phone"></i> {{ cliente.Fone }}<br>{% endif %}
+                    {% if cliente.Celular1 %}<i class="fas fa-mobile-alt"></i> {{ cliente.Celular1 }}<br>{% endif %}
+                    {% if cliente.Email %}<i class="fas fa-envelope"></i> <a href="mailto:{{ cliente.Email }}">{{ cliente.Email }}</a>{% endif %}
+                </address>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.card-header h5 {
+    margin-bottom: 0;
+}
+
+dl dt {
+    font-weight: 600;
+    color: #495057;
+}
+
+dl dd {
+    margin-bottom: 0.5rem;
+}
+
+.badge {
+    font-size: 0.9em;
+}
+
+address {
+    font-style: normal;
+    line-height: 1.6;
+}
+
+.btn-toolbar .btn-group {
+    margin-right: 0.5rem;
+}
+</style>
 {% endblock %}
