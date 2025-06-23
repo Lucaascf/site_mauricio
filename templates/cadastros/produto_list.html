@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Produtos - Gestão Comercial{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="fas fa-boxes"></i> Produtos</h2>
+        <p class="text-muted">Total: {{ total_produtos }} produtos cadastrados</p>
+    </div>
+    <div>
+        <a href="{% url 'cadastros:produto_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Novo Produto
+        </a>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <form method="get" class="d-flex">
+            <input type="text" name="search" class="form-control" placeholder="Buscar por código, descrição, unidade..." value="{{ search }}">
+            <button type="submit" class="btn btn-outline-secondary ms-2">
+                <i class="fas fa-search"></i> Buscar
+            </button>
+            {% if search %}
+                <a href="{% url 'cadastros:produto_list' %}" class="btn btn-outline-danger ms-2">
+                    <i class="fas fa-times"></i> Limpar
+                </a>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Descrição</th>
+                <th>Unidade</th>
+                <th>Valor</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for produto in produtos %}
+            <tr>
+                <td>
+                    <span class="badge bg-primary">{{ produto.CodProd }}</span>
+                </td>
+                <td>
+                    <a href="{% url 'cadastros:produto_detail' produto.pk %}" class="text-decoration-none">
+                        {{ produto.Descricao|default:"<em class='text-muted'>Sem descrição</em>" }}
+                    </a>
+                </td>
+                <td>
+                    {% if produto.Unid %}
+                        {{ produto.Unid }}
+                    {% else %}
+                        <small class="text-muted">-</small>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if produto.Valor %}
+                        <span class="text-success fw-bold">R$ {{ produto.get_valor_decimal|floatformat:2 }}</span>
+                    {% else %}
+                        <small class="text-muted">R$ 0,00</small>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'cadastros:produto_detail' produto.pk %}" class="btn btn-sm btn-info" title="Visualizar">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{% url 'cadastros:produto_update' produto.pk %}" class="btn btn-sm btn-warning" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'cadastros:produto_delete' produto.pk %}" class="btn btn-sm btn-danger" title="Remover"
+                           onclick="return confirm('Tem certeza que deseja remover este produto?')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center">Nenhum produto encontrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if is_paginated %}
+<nav aria-label="Paginação">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}">Primeira</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}">Anterior</a>
+            </li>
+        {% endif %}
+        
+        <li class="page-item active">
+            <span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        </li>
+        
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}">Próxima</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}">Última</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

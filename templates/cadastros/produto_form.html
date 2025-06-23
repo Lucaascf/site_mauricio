@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }} - Sistema de Gestão{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2><i class="fas fa-box"></i> {{ title }}</h2>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'cadastros:produto_list' %}">Produtos</a></li>
+                            <li class="breadcrumb-item active">{{ action }}</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <a href="{% url 'cadastros:produto_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Voltar
+                    </a>
+                </div>
+            </div>
+
+            <!-- Formulário -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-edit"></i> Dados do Produto
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Informações Básicas -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary border-bottom pb-2">
+                                    <i class="fas fa-info-circle"></i> Informações Básicas
+                                </h6>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.CodProd.id_for_label }}" class="form-label">
+                                    <i class="fas fa-hashtag"></i> Código Produto *
+                                </label>
+                                {{ form.CodProd }}
+                                {% if form.CodProd.errors %}
+                                    <div class="text-danger">{{ form.CodProd.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-9 mb-3">
+                                <label for="{{ form.Descricao.id_for_label }}" class="form-label">
+                                    <i class="fas fa-tag"></i> Descrição *
+                                </label>
+                                {{ form.Descricao }}
+                                {% if form.Descricao.errors %}
+                                    <div class="text-danger">{{ form.Descricao.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.Unid.id_for_label }}" class="form-label">
+                                    <i class="fas fa-balance-scale"></i> Unidade
+                                </label>
+                                {{ form.Unid }}
+                                {% if form.Unid.errors %}
+                                    <div class="text-danger">{{ form.Unid.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">Ex: UN, KG, M², L, etc.</small>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.Valor.id_for_label }}" class="form-label">
+                                    <i class="fas fa-dollar-sign"></i> Valor
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    {{ form.Valor }}
+                                </div>
+                                {% if form.Valor.errors %}
+                                    <div class="text-danger">{{ form.Valor.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Informações Adicionais -->
+                        <div class="row mb-4 mt-4">
+                            <div class="col-12">
+                                <h6 class="text-primary border-bottom pb-2">
+                                    <i class="fas fa-clipboard-list"></i> Informações Adicionais
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label for="{{ form.DadosProd.id_for_label }}" class="form-label">
+                                    <i class="fas fa-sticky-note"></i> Dados do Produto
+                                </label>
+                                <textarea name="DadosProd" class="form-control" rows="4" placeholder="Informações técnicas, especificações, observações sobre o produto...">{{ form.DadosProd.value|default:"" }}</textarea>
+                                {% if form.DadosProd.errors %}
+                                    <div class="text-danger">{{ form.DadosProd.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Botões -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'cadastros:produto_list' %}" class="btn btn-secondary">
+                                        <i class="fas fa-times"></i> Cancelar
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> {{ action }} Produto
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Máscaras e validações para campos
+document.addEventListener('DOMContentLoaded', function() {
+    // Máscara para valor monetário
+    const valorField = document.querySelector('input[name="Valor"]');
+    if (valorField) {
+        valorField.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = (value / 100).toFixed(2);
+            value = value.replace('.', ',');
+            value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            e.target.value = value;
+        });
+        
+        // Formatação inicial se houver valor
+        if (valorField.value) {
+            let value = valorField.value.replace(/\D/g, '');
+            if (value) {
+                value = (parseFloat(value) / 100).toFixed(2);
+                value = value.replace('.', ',');
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                valorField.value = value;
+            }
+        }
+    }
+    
+    // Converter unidade para maiúsculo
+    const unidField = document.querySelector('input[name="Unid"]');
+    if (unidField) {
+        unidField.addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+    }
+    
+    // Converter código para maiúsculo
+    const codField = document.querySelector('input[name="CodProd"]');
+    if (codField) {
+        codField.addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+    }
+});
+</script>
+{% endblock %}

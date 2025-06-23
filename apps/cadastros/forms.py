@@ -93,34 +93,56 @@ class FornecedorForm(forms.ModelForm):
             return self.instance.CodFor
             
         return codigo.upper()
-
+    
 class ProdutoForm(forms.ModelForm):
     class Meta:
         model = Produto
-        fields = ['CodProd', 'Descricao', 'Unid', 'Valor']
+        fields = ['CodProd', 'Descricao', 'Unid', 'Valor', 'DadosProd']
         
         widgets = {
-            'CodProd': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Código do produto'}),
-            'Descricao': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Descrição do produto'}),
-            'Unid': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Unidade'}),
-            'Valor': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Valor'}),
+            'CodProd': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Ex: PROD001'
+            }),
+            'Descricao': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Descrição do produto'
+            }),
+            'Unid': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'UN, KG, M², L, etc.'
+            }),
+            'Valor': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': '0,00'
+            }),
+            'DadosProd': forms.Textarea(attrs={
+                'class': 'form-control', 
+                'rows': 4,
+                'placeholder': 'Informações técnicas, especificações, observações sobre o produto...'
+            }),
         }
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Se é edição (instance existe), torna o campo CodProd readonly
-        if self.instance and self.instance.pk:
-            self.fields['CodProd'].widget.attrs['readonly'] = True
-            self.fields['CodProd'].widget.attrs['class'] += ' bg-light'
-            self.fields['CodProd'].help_text = 'O código do produto não pode ser alterado após a criação.'
     
     def clean_CodProd(self):
         codigo = self.cleaned_data.get('CodProd')
         if not codigo:
             raise forms.ValidationError('Código do produto é obrigatório.')
-        
-        # Se é edição, retorna o código original (não permite alteração)
-        if self.instance and self.instance.pk:
-            return self.instance.CodProd
-            
-        return codigo.upper()
+        return codigo.upper().strip()
+    
+    def clean_Descricao(self):
+        descricao = self.cleaned_data.get('Descricao')
+        if descricao:
+            return descricao.strip()
+        return descricao
+    
+    def clean_Valor(self):
+        valor = self.cleaned_data.get('Valor')
+        if valor:
+            # Remove formatação e converte para formato de banco
+            valor = str(valor).replace('.', '').replace(',', '.')
+            try:
+                float(valor)
+                return valor
+            except ValueError:
+                raise forms.ValidationError('Valor deve ser um número válido.')
+        return valor

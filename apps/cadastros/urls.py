@@ -20,8 +20,8 @@ urlpatterns = [
     
     # Produto URLs - CORRIGIDO: usando str:pk para chaves primárias string
     path('produtos/', views.ProdutoListView.as_view(), name='produto_list'),
-    path('produtos/<str:pk>/', views.ProdutoDetailView.as_view(), name='produto_detail'),
     path('produtos/novo/', views.ProdutoCreateView.as_view(), name='produto_create'),
+    path('produtos/<str:pk>/', views.ProdutoDetailView.as_view(), name='produto_detail'),
     path('produtos/<str:pk>/editar/', views.ProdutoUpdateView.as_view(), name='produto_update'),
     path('produtos/<str:pk>/remover/', views.ProdutoDeleteView.as_view(), name='produto_delete'),
 ]

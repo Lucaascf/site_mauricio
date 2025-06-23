@@ -7,8 +7,9 @@ from django.urls import reverse_lazy
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.db import transaction
-from .models import Cliente, Fornecedor, Produto
+from .models import Cliente, Fornecedor, Produto, Cotacao, Pedido
 from .forms import ClienteForm, FornecedorForm, ProdutoForm
+
 
 # ============= VIEWS CLIENTES =============
 
@@ -369,7 +370,8 @@ class ProdutoListView(LoginRequiredMixin, ListView):
         if search:
             queryset = queryset.filter(
                 Q(CodProd__icontains=search) |
-                Q(Descricao__icontains=search)
+                Q(Descricao__icontains=search) |
+                Q(Unid__icontains=search)
             )
         return queryset.order_by('CodProd')
     
@@ -384,22 +386,44 @@ class ProdutoDetailView(LoginRequiredMixin, DetailView):
     model = Produto
     template_name = 'cadastros/produto_detail.html'
     context_object_name = 'produto'
-    pk_url_kwarg = 'pk'
     
-    def get_object(self, queryset=None):
-        """Override para buscar pelo CodProd"""
-        if queryset is None:
-            queryset = self.get_queryset()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        produto = self.object
         
-        pk = self.kwargs.get(self.pk_url_kwarg)
-        if pk is not None:
-            try:
-                return queryset.get(CodProd=pk)
-            except Produto.DoesNotExist:
-                from django.http import Http404
-                raise Http404(f"Produto com código '{pk}' não encontrado.")
+        # Buscar cotações relacionadas (últimas 10)
+        cotacoes = Cotacao.objects.filter(
+            CodProd=produto.CodProd
+        ).order_by('-NumCot')[:10]
         
-        raise AttributeError("ProdutoDetailView deve ser chamado com um pk.")
+        # Buscar pedidos relacionados (últimos 10)
+        pedidos = Pedido.objects.filter(
+            CodProd=produto.CodProd
+        ).order_by('-NumPed')[:10]
+        
+        # Estatísticas
+        total_cotacoes = Cotacao.objects.filter(CodProd=produto.CodProd).count()
+        total_pedidos = Pedido.objects.filter(CodProd=produto.CodProd).count()
+        
+        # Última cotação e último pedido
+        ultima_cotacao = Cotacao.objects.filter(
+            CodProd=produto.CodProd
+        ).order_by('-NumCot').first()
+        
+        ultimo_pedido = Pedido.objects.filter(
+            CodProd=produto.CodProd
+        ).order_by('-NumPed').first()
+        
+        context.update({
+            'cotacoes': cotacoes,
+            'pedidos': pedidos,
+            'total_cotacoes': total_cotacoes,
+            'total_pedidos': total_pedidos,
+            'ultima_cotacao': ultima_cotacao,
+            'ultimo_pedido': ultimo_pedido,
+        })
+        
+        return context
 
 
 class ProdutoCreateView(LoginRequiredMixin, CreateView):
@@ -416,17 +440,27 @@ class ProdutoCreateView(LoginRequiredMixin, CreateView):
     
     def form_valid(self, form):
         try:
-            codigo = form.cleaned_data['CodProd'].upper().strip()
-            if Produto.objects.filter(CodProd=codigo).exists():
-                messages.error(self.request, f'Produto com código "{codigo}" já existe!')
-                return self.form_invalid(form)
-            
-            instance = form.save(commit=False)
-            instance.CodProd = codigo
-            instance.save()
-            
-            messages.success(self.request, f'Produto "{codigo}" criado com sucesso!')
-            return super().form_valid(form)
+            with transaction.atomic():
+                codigo = form.cleaned_data['CodProd'].upper().strip()
+                
+                if Produto.objects.filter(CodProd=codigo).exists():
+                    messages.error(self.request, f'Produto com código "{codigo}" já existe!')
+                    return self.form_invalid(form)
+                
+                instance = form.save(commit=False)
+                instance.CodProd = codigo
+                
+                # Converter strings vazias para None
+                for field in instance._meta.fields:
+                    if field.name not in ['CodProd', 'Descricao']:
+                        value = getattr(instance, field.name)
+                        if value == '':
+                            setattr(instance, field.name, None)
+                
+                instance.save()
+                messages.success(self.request, f'Produto "{codigo}" criado com sucesso!')
+                return super().form_valid(form)
+                
         except Exception as e:
             messages.error(self.request, f'Erro ao criar produto: {str(e)}')
             return self.form_invalid(form)
@@ -449,30 +483,9 @@ class ProdutoUpdateView(LoginRequiredMixin, UpdateView):
     
     def form_valid(self, form):
         try:
-            print(f"=== PRODUTO UPDATE - FORM VÁLIDO ===")
-            print(f"=== EDITANDO PRODUTO: {self.object.CodProd} ===")
-            
-            # Garantir que o código não mude
-            instance = form.save(commit=False)
-            instance.CodProd = self.object.CodProd  # Força o código original
-            
-            # Converter strings vazias para None (exceto campos obrigatórios)
-            for field in instance._meta.fields:
-                if field.name not in ['CodProd', 'Descricao']:
-                    value = getattr(instance, field.name)
-                    if value == '':
-                        setattr(instance, field.name, None)
-            
-            print(f"=== SALVANDO ATUALIZAÇÕES: {instance.CodProd} - {instance.Descricao} ===")
-            instance.save()
-            
             messages.success(self.request, f'Produto "{self.object.CodProd}" atualizado com sucesso!')
             return super().form_valid(form)
-            
         except Exception as e:
-            print(f"=== ERRO AO ATUALIZAR: {str(e)} ===")
-            import traceback
-            print(f"=== TRACEBACK: {traceback.format_exc()} ===")
             messages.error(self.request, f'Erro ao atualizar produto: {str(e)}')
             return self.form_invalid(form)
 
@@ -482,19 +495,27 @@ class ProdutoDeleteView(LoginRequiredMixin, DeleteView):
     template_name = 'cadastros/produto_confirm_delete.html'
     success_url = reverse_lazy('cadastros:produto_list')
     context_object_name = 'produto'
-    pk_url_kwarg = 'pk'
     
-    def get_object(self, queryset=None):
-        """Override para buscar pelo CodProd"""
-        if queryset is None:
-            queryset = self.get_queryset()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        produto = self.object
         
-        pk = self.kwargs.get(self.pk_url_kwarg)
-        if pk is not None:
-            try:
-                return queryset.get(CodProd=pk)
-            except Produto.DoesNotExist:
-                from django.http import Http404
-                raise Http404(f"Produto com código '{pk}' não encontrado.")
+        # Verificar relacionamentos antes da exclusão
+        total_cotacoes = Cotacao.objects.filter(CodProd=produto.CodProd).count()
+        total_pedidos = Pedido.objects.filter(CodProd=produto.CodProd).count()
         
-        raise AttributeError("ProdutoDeleteView deve ser chamado com um pk.")
+        context.update({
+            'total_cotacoes': total_cotacoes,
+            'total_pedidos': total_pedidos,
+        })
+        
+        return context
+    
+    def delete(self, request, *args, **kwargs):
+        try:
+            self.object = self.get_object()
+            messages.success(request, f'Produto "{self.object.CodProd}" excluído com sucesso!')
+            return super().delete(request, *args, **kwargs)
+        except Exception as e:
+            messages.error(request, f'Erro ao excluir produto: {str(e)}')
+            return redirect('cadastros:produto_detail', pk=self.object.pk)

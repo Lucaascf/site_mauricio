@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Remover Produto - Gestão Comercial{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Remover Produto</h1>
+    <a href="{% url 'cadastros:produto_detail' object.pk %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Voltar
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5><i class="fas fa-exclamation-triangle"></i> Confirmação de Remoção</h5>
+            </div>
+            <div class="card-body">
+                <p class="lead">Tem certeza que deseja remover o produto abaixo?</p>
+                
+                <div class="alert alert-warning">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-primary me-2">{{ object.CodProd }}</span>
+                        <strong>{{ object.Descricao|default:"Produto sem descrição" }}</strong>
+                    </div>
+                    <small class="text-muted">
+                        Unidade: {{ object.Unid|default:"N/A" }} | 
+                        Valor: {% if object.Valor %}R$ {{ object.get_valor_decimal|floatformat:2 }}{% else %}R$ 0,00{% endif %}
+                    </small>
+                </div>
+                
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Atenção:</strong> Esta ação não pode ser desfeita! Todas as informações relacionadas a este produto serão perdidas.
+                </div>
+
+                <!-- Verificar se há cotações ou pedidos relacionados -->
+                {% if total_cotacoes > 0 or total_pedidos > 0 %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Atenção:</strong> Este produto possui:
+                    <ul class="mb-0 mt-2">
+                        {% if total_cotacoes > 0 %}
+                        <li>{{ total_cotacoes }} cotação(ões) relacionada(s)</li>
+                        {% endif %}
+                        {% if total_pedidos > 0 %}
+                        <li>{{ total_pedidos }} pedido(s) relacionado(s)</li>
+                        {% endif %}
+                    </ul>
+                    <small class="text-muted">A remoção do produto pode afetar estes registros.</small>
+                </div>
+                {% endif %}
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-end">
+                        <a href="{% url 'cadastros:produto_detail' object.pk %}" class="btn btn-secondary me-2">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Sim, Remover
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ produto.Descricao }} - Gestão Comercial{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Detalhes do Produto</h1>
+    <div>
+        <a href="{% url 'cadastros:produto_update' produto.pk %}" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Editar
+        </a>
+        <a href="{% url 'cadastros:produto_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> Informações Básicas</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Código:</strong> 
+                            <span class="badge bg-primary fs-6">{{ produto.CodProd }}</span>
+                        </p>
+                        <p><strong>Descrição:</strong> {{ produto.Descricao|default:"-" }}</p>
+                        <p><strong>Unidade:</strong> 
+                            {% if produto.Unid %}
+                                <span class="badge bg-info">{{ produto.Unid }}</span>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Valor:</strong> 
+                            {% if produto.Valor %}
+                                <span class="text-success fw-bold fs-5">R$ {{ produto.get_valor_decimal|floatformat:2 }}</span>
+                            {% else %}
+                                <span class="text-muted">R$ 0,00</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if produto.DadosProd %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5><i class="fas fa-clipboard-list"></i> Dados do Produto</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-0">{{ produto.DadosProd|linebreaks }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Histórico de Cotações -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5><i class="fas fa-clipboard-check"></i> Últimas Cotações</h5>
+            </div>
+            <div class="card-body">
+                {% if cotacoes %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Número</th>
+                                    <th>Data</th>
+                                    <th>Cliente</th>
+                                    <th>Fornecedor</th>
+                                    <th>Quantidade</th>
+                                    <th>Preço</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cotacao in cotacoes %}
+                                <tr>
+                                    <td><span class="badge bg-secondary">{{ cotacao.NumCot }}</span></td>
+                                    <td>{{ cotacao.DataCot|default:"-" }}</td>
+                                    <td>{{ cotacao.CodCli|default:"-" }}</td>
+                                    <td>{{ cotacao.CodFor|default:"-" }}</td>
+                                    <td>{{ cotacao.Quant|default:"-" }} {{ cotacao.Unid|default:"" }}</td>
+                                    <td>
+                                        {% if cotacao.Preco %}
+                                            <span class="text-success">R$ {{ cotacao.Preco }}</span>
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">Nenhuma cotação encontrada para este produto.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Histórico de Pedidos -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5><i class="fas fa-shopping-cart"></i> Últimos Pedidos</h5>
+            </div>
+            <div class="card-body">
+                {% if pedidos %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Número</th>
+                                    <th>Data</th>
+                                    <th>Cliente</th>
+                                    <th>Fornecedor</th>
+                                    <th>Quantidade</th>
+                                    <th>Valor Total</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pedido in pedidos %}
+                                <tr>
+                                    <td><span class="badge bg-primary">{{ pedido.NumPed }}</span></td>
+                                    <td>{{ pedido.DataPed|default:"-" }}</td>
+                                    <td>{{ pedido.CodCli|default:"-" }}</td>
+                                    <td>{{ pedido.CodFor|default:"-" }}</td>
+                                    <td>{{ pedido.Quant|default:"-" }} {{ pedido.Unid|default:"" }}</td>
+                                    <td>
+                                        {% if pedido.VrTot %}
+                                            <span class="text-success fw-bold">R$ {{ pedido.VrTot }}</span>
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if pedido.Status %}
+                                            <span class="badge bg-info">{{ pedido.Status }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Sem status</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">Nenhum pedido encontrado para este produto.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-bar"></i> Estatísticas</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Total de Cotações:</strong><br>
+                    <span class="badge bg-info fs-6">{{ total_cotacoes }} cotações</span>
+                </p>
+                <p><strong>Total de Pedidos:</strong><br>
+                    <span class="badge bg-success fs-6">{{ total_pedidos }} pedidos</span>
+                </p>
+                {% if ultima_cotacao %}
+                <p><strong>Última Cotação:</strong><br>{{ ultima_cotacao.DataCot|default:"N/A" }}</p>
+                {% endif %}
+                {% if ultimo_pedido %}
+                <p><strong>Último Pedido:</strong><br>{{ ultimo_pedido.DataPed|default:"N/A" }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5><i class="fas fa-cogs"></i> Ações</h5>
+            </div>
+            <div class="card-body">
+                <a href="{% url 'cadastros:produto_update' produto.pk %}" class="btn btn-warning btn-sm d-block mb-2">
+                    <i class="fas fa-edit"></i> Editar Produto
+                </a>
+                <a href="{% url 'cadastros:produto_delete' produto.pk %}" class="btn btn-danger btn-sm d-block mb-2"
+                   onclick="return confirm('Tem certeza que deseja remover este produto?')">
+                    <i class="fas fa-trash"></i> Remover Produto
+                </a>
+                <hr>
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-info btn-sm" onclick="alert('Funcionalidade em desenvolvimento')">
+                        <i class="fas fa-plus"></i> Nova Cotação
+                    </button>
+                    <button type="button" class="btn btn-success btn-sm" onclick="alert('Funcionalidade em desenvolvimento')">
+                        <i class="fas fa-shopping-cart"></i> Novo Pedido
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
