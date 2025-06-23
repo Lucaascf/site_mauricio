@@ -127,25 +127,9 @@ class ClienteUpdateView(LoginRequiredMixin, UpdateView):
     model = Cliente
     form_class = ClienteForm
     template_name = 'cadastros/cliente_form.html'
-    pk_url_kwarg = 'pk'
-    
-    def get_object(self, queryset=None):
-        """Override para buscar pelo CodCli"""
-        if queryset is None:
-            queryset = self.get_queryset()
-        
-        pk = self.kwargs.get(self.pk_url_kwarg)
-        if pk is not None:
-            try:
-                return queryset.get(CodCli=pk)
-            except Cliente.DoesNotExist:
-                from django.http import Http404
-                raise Http404(f"Cliente com código '{pk}' não encontrado.")
-        
-        raise AttributeError("ClienteUpdateView deve ser chamado com um pk.")
     
     def get_success_url(self):
-        return reverse_lazy('cadastros:cliente_detail', kwargs={'pk': self.object.CodCli})
+        return reverse_lazy('cadastros:cliente_detail', kwargs={'pk': self.object.pk})
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -156,11 +140,39 @@ class ClienteUpdateView(LoginRequiredMixin, UpdateView):
     
     def form_valid(self, form):
         try:
+            print(f"=== CLIENTE UPDATE - FORM VÁLIDO ===")
+            print(f"=== EDITANDO CLIENTE: {self.object.CodCli} ===")
+            
+            # Garantir que o código não mude
+            instance = form.save(commit=False)
+            instance.CodCli = self.object.CodCli  # Força o código original
+            
+            # Converter strings vazias para None (exceto campos obrigatórios)
+            for field in instance._meta.fields:
+                if field.name not in ['CodCli', 'RazaoSoc']:
+                    value = getattr(instance, field.name)
+                    if value == '':
+                        setattr(instance, field.name, None)
+            
+            print(f"=== SALVANDO ATUALIZAÇÕES: {instance.CodCli} - {instance.RazaoSoc} ===")
+            instance.save()
+            
             messages.success(self.request, f'Cliente "{self.object.CodCli}" atualizado com sucesso!')
             return super().form_valid(form)
+            
         except Exception as e:
+            print(f"=== ERRO AO ATUALIZAR: {str(e)} ===")
+            import traceback
+            print(f"=== TRACEBACK: {traceback.format_exc()} ===")
             messages.error(self.request, f'Erro ao atualizar cliente: {str(e)}')
             return self.form_invalid(form)
+    
+    def form_invalid(self, form):
+        print(f"=== FORM INVÁLIDO NA EDIÇÃO ===")
+        for field, errors in form.errors.items():
+            print(f"{field}: {errors}")
+        messages.error(self.request, 'Por favor, corrija os erros abaixo.')
+        return super().form_invalid(form)
 
 
 class ClienteDeleteView(LoginRequiredMixin, DeleteView):
@@ -280,25 +292,9 @@ class FornecedorUpdateView(LoginRequiredMixin, UpdateView):
     model = Fornecedor
     form_class = FornecedorForm
     template_name = 'cadastros/fornecedor_form.html'
-    pk_url_kwarg = 'pk'
-    
-    def get_object(self, queryset=None):
-        """Override para buscar pelo CodFor"""
-        if queryset is None:
-            queryset = self.get_queryset()
-        
-        pk = self.kwargs.get(self.pk_url_kwarg)
-        if pk is not None:
-            try:
-                return queryset.get(CodFor=pk)
-            except Fornecedor.DoesNotExist:
-                from django.http import Http404
-                raise Http404(f"Fornecedor com código '{pk}' não encontrado.")
-        
-        raise AttributeError("FornecedorUpdateView deve ser chamado com um pk.")
     
     def get_success_url(self):
-        return reverse_lazy('cadastros:fornecedor_detail', kwargs={'pk': self.object.CodFor})
+        return reverse_lazy('cadastros:fornecedor_detail', kwargs={'pk': self.object.pk})
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -306,7 +302,35 @@ class FornecedorUpdateView(LoginRequiredMixin, UpdateView):
         context['action'] = 'Atualizar'
         context['fornecedor'] = self.object
         return context
-
+    
+    def form_valid(self, form):
+        try:
+            print(f"=== FORNECEDOR UPDATE - FORM VÁLIDO ===")
+            print(f"=== EDITANDO FORNECEDOR: {self.object.CodFor} ===")
+            
+            # Garantir que o código não mude
+            instance = form.save(commit=False)
+            instance.CodFor = self.object.CodFor  # Força o código original
+            
+            # Converter strings vazias para None (exceto campos obrigatórios)
+            for field in instance._meta.fields:
+                if field.name not in ['CodFor', 'RazaoSoc']:
+                    value = getattr(instance, field.name)
+                    if value == '':
+                        setattr(instance, field.name, None)
+            
+            print(f"=== SALVANDO ATUALIZAÇÕES: {instance.CodFor} - {instance.RazaoSoc} ===")
+            instance.save()
+            
+            messages.success(self.request, f'Fornecedor "{self.object.CodFor}" atualizado com sucesso!')
+            return super().form_valid(form)
+            
+        except Exception as e:
+            print(f"=== ERRO AO ATUALIZAR: {str(e)} ===")
+            import traceback
+            print(f"=== TRACEBACK: {traceback.format_exc()} ===")
+            messages.error(self.request, f'Erro ao atualizar fornecedor: {str(e)}')
+            return self.form_invalid(form)
 
 class FornecedorDeleteView(LoginRequiredMixin, DeleteView):
     model = Fornecedor
@@ -412,25 +436,9 @@ class ProdutoUpdateView(LoginRequiredMixin, UpdateView):
     model = Produto
     form_class = ProdutoForm
     template_name = 'cadastros/produto_form.html'
-    pk_url_kwarg = 'pk'
-    
-    def get_object(self, queryset=None):
-        """Override para buscar pelo CodProd"""
-        if queryset is None:
-            queryset = self.get_queryset()
-        
-        pk = self.kwargs.get(self.pk_url_kwarg)
-        if pk is not None:
-            try:
-                return queryset.get(CodProd=pk)
-            except Produto.DoesNotExist:
-                from django.http import Http404
-                raise Http404(f"Produto com código '{pk}' não encontrado.")
-        
-        raise AttributeError("ProdutoUpdateView deve ser chamado com um pk.")
     
     def get_success_url(self):
-        return reverse_lazy('cadastros:produto_detail', kwargs={'pk': self.object.CodProd})
+        return reverse_lazy('cadastros:produto_detail', kwargs={'pk': self.object.pk})
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -438,6 +446,35 @@ class ProdutoUpdateView(LoginRequiredMixin, UpdateView):
         context['action'] = 'Atualizar'
         context['produto'] = self.object
         return context
+    
+    def form_valid(self, form):
+        try:
+            print(f"=== PRODUTO UPDATE - FORM VÁLIDO ===")
+            print(f"=== EDITANDO PRODUTO: {self.object.CodProd} ===")
+            
+            # Garantir que o código não mude
+            instance = form.save(commit=False)
+            instance.CodProd = self.object.CodProd  # Força o código original
+            
+            # Converter strings vazias para None (exceto campos obrigatórios)
+            for field in instance._meta.fields:
+                if field.name not in ['CodProd', 'Descricao']:
+                    value = getattr(instance, field.name)
+                    if value == '':
+                        setattr(instance, field.name, None)
+            
+            print(f"=== SALVANDO ATUALIZAÇÕES: {instance.CodProd} - {instance.Descricao} ===")
+            instance.save()
+            
+            messages.success(self.request, f'Produto "{self.object.CodProd}" atualizado com sucesso!')
+            return super().form_valid(form)
+            
+        except Exception as e:
+            print(f"=== ERRO AO ATUALIZAR: {str(e)} ===")
+            import traceback
+            print(f"=== TRACEBACK: {traceback.format_exc()} ===")
+            messages.error(self.request, f'Erro ao atualizar produto: {str(e)}')
+            return self.form_invalid(form)
 
 
 class ProdutoDeleteView(LoginRequiredMixin, DeleteView):
