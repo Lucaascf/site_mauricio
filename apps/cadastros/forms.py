@@ -110,7 +110,7 @@ class ProdutoForm(forms.ModelForm):
             }),
             'Unid': forms.TextInput(attrs={
                 'class': 'form-control', 
-                'placeholder': 'UN, KG, M², L, etc.'
+                'placeholder': ''
             }),
             'Valor': forms.TextInput(attrs={
                 'class': 'form-control', 
