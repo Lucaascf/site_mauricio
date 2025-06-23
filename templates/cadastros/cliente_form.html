@@ -1,26 +1,392 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
-{% block title %}{% if object %}Editar{% else %}Novo{% endif %} Cliente - Gestão Comercial{% endblock %}
+{% block title %}{{ title }} - Sistema de Gestão{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">{% if object %}Editar Cliente{% else %}Novo Cliente{% endif %}</h1>
-    <a href="{% url 'cadastros:cliente_list' %}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Voltar
-    </a>
-</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2><i class="fas fa-user-plus"></i> {{ title }}</h2>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'cadastros:cliente_list' %}">Clientes</a></li>
+                            <li class="breadcrumb-item active">{{ action }}</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <a href="{% url 'cadastros:cliente_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Voltar
+                    </a>
+                </div>
+            </div>
 
-<div class="row">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    {% crispy form %}
-                </form>
+            <!-- Formulário -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-edit"></i> Dados do Cliente
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Informações Básicas -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-info-circle"></i> Informações Básicas
+                                </h6>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-lg-2 col-md-3 mb-3">
+                                <label for="{{ form.CodCli.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-hashtag"></i> Código Cliente *
+                                </label>
+                                <input type="text" class="form-control" name="CodCli" id="{{ form.CodCli.id_for_label }}" value="{{ form.CodCli.value|default:'' }}" required>
+                                {% if form.CodCli.errors %}
+                                    <div class="text-danger small mt-1">{{ form.CodCli.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-lg-10 col-md-9 mb-3">
+                                <label for="{{ form.RazaoSoc.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-building"></i> Razão Social *
+                                </label>
+                                <input type="text" class="form-control" name="RazaoSoc" id="{{ form.RazaoSoc.id_for_label }}" value="{{ form.RazaoSoc.value|default:'' }}" required>
+                                {% if form.RazaoSoc.errors %}
+                                    <div class="text-danger small mt-1">{{ form.RazaoSoc.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <label for="{{ form.Cnpj.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-id-card"></i> CNPJ
+                                </label>
+                                <input type="text" class="form-control" name="Cnpj" id="{{ form.Cnpj.id_for_label }}" value="{{ form.Cnpj.value|default:'' }}">
+                                {% if form.Cnpj.errors %}
+                                    <div class="text-danger small mt-1">{{ form.Cnpj.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <label for="{{ form.InscRg.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-certificate"></i> Inscrição Estadual
+                                </label>
+                                <input type="text" class="form-control" name="InscRg" id="{{ form.InscRg.id_for_label }}" value="{{ form.InscRg.value|default:'' }}">
+                                {% if form.InscRg.errors %}
+                                    <div class="text-danger small mt-1">{{ form.InscRg.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-lg-4 col-md-12 mb-3">
+                                <label for="{{ form.Email.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-envelope"></i> Email
+                                </label>
+                                <input type="text" class="form-control" name="Email" id="{{ form.Email.id_for_label }}" value="{{ form.Email.value|default:'' }}">
+                                {% if form.Email.errors %}
+                                    <div class="text-danger small mt-1">{{ form.Email.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Endereço -->
+                        <div class="row mb-4 mt-4">
+                            <div class="col-12">
+                                <h6 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-map-marker-alt"></i> Endereço
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-7 col-md-8 mb-3">
+                                <label for="{{ form.End.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-road"></i> Endereço
+                                </label>
+                                <input type="text" class="form-control" name="End" id="{{ form.End.id_for_label }}" value="{{ form.End.value|default:'' }}">
+                                {% if form.End.errors %}
+                                    <div class="text-danger small mt-1">{{ form.End.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-lg-5 col-md-4 mb-3">
+                                <label for="{{ form.Bairro.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-map"></i> Bairro
+                                </label>
+                                <input type="text" class="form-control" name="Bairro" id="{{ form.Bairro.id_for_label }}" value="{{ form.Bairro.value|default:'' }}">
+                                {% if form.Bairro.errors %}
+                                    <div class="text-danger small mt-1">{{ form.Bairro.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-5 col-md-6 mb-3">
+                                <label for="{{ form.Cidade.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-city"></i> Cidade
+                                </label>
+                                <input type="text" class="form-control" name="Cidade" id="{{ form.Cidade.id_for_label }}" value="{{ form.Cidade.value|default:'' }}">
+                                {% if form.Cidade.errors %}
+                                    <div class="text-danger small mt-1">{{ form.Cidade.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-lg-3 col-md-3 mb-3">
+                                <label for="{{ form.Est.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-flag"></i> Estado
+                                </label>
+                                <input type="text" 
+                                    class="form-control" 
+                                    name="Est" 
+                                    id="{{ form.Est.id_for_label }}" 
+                                    value="{{ form.Est.value|default:'' }}" 
+                                    placeholder="Digite ou selecione"
+                                    list="estados-siglas">
+                                <datalist id="estados-siglas">
+                                    <option value="AC">
+                                    <option value="AL">
+                                    <option value="AP">
+                                    <option value="AM">
+                                    <option value="BA">
+                                    <option value="CE">
+                                    <option value="DF">
+                                    <option value="ES">
+                                    <option value="GO">
+                                    <option value="MA">
+                                    <option value="MT">
+                                    <option value="MS">
+                                    <option value="MG">
+                                    <option value="PA">
+                                    <option value="PB">
+                                    <option value="PR">
+                                    <option value="PE">
+                                    <option value="PI">
+                                    <option value="RJ">
+                                    <option value="RN">
+                                    <option value="RS">
+                                    <option value="RO">
+                                    <option value="RR">
+                                    <option value="SC">
+                                    <option value="SP">
+                                    <option value="SE">
+                                    <option value="TO">
+                                </datalist>
+                                {% if form.Est.errors %}
+                                    <div class="text-danger small mt-1">{{ form.Est.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-lg-4 col-md-3 mb-3">
+                                <label for="{{ form.Cep.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-mail-bulk"></i> CEP
+                                </label>
+                                <input type="text" class="form-control" name="Cep" id="{{ form.Cep.id_for_label }}" value="{{ form.Cep.value|default:'' }}">
+                                {% if form.Cep.errors %}
+                                    <div class="text-danger small mt-1">{{ form.Cep.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Contato -->
+                        <div class="row mb-4 mt-4">
+                            <div class="col-12">
+                                <h6 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-phone"></i> Contato
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <label for="{{ form.Fone.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-phone"></i> Telefone
+                                </label>
+                                <input type="text" class="form-control" name="Fone" id="{{ form.Fone.id_for_label }}" value="{{ form.Fone.value|default:'' }}">
+                                {% if form.Fone.errors %}
+                                    <div class="text-danger small mt-1">{{ form.Fone.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <label for="{{ form.Fax.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-fax"></i> Fax
+                                </label>
+                                <input type="text" class="form-control" name="Fax" id="{{ form.Fax.id_for_label }}" value="{{ form.Fax.value|default:'' }}">
+                                {% if form.Fax.errors %}
+                                    <div class="text-danger small mt-1">{{ form.Fax.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <label for="{{ form.Celular1.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-mobile-alt"></i> Celular 1
+                                </label>
+                                <input type="text" class="form-control" name="Celular1" id="{{ form.Celular1.id_for_label }}" value="{{ form.Celular1.value|default:'' }}">
+                                {% if form.Celular1.errors %}
+                                    <div class="text-danger small mt-1">{{ form.Celular1.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <label for="{{ form.Celular2.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-mobile-alt"></i> Celular 2
+                                </label>
+                                <input type="text" class="form-control" name="Celular2" id="{{ form.Celular2.id_for_label }}" value="{{ form.Celular2.value|default:'' }}">
+                                {% if form.Celular2.errors %}
+                                    <div class="text-danger small mt-1">{{ form.Celular2.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Contatos -->
+                        <div class="row mb-4 mt-4">
+                            <div class="col-12">
+                                <h6 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-users"></i> Pessoas de Contato
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-4 col-md-4 mb-3">
+                                <label for="{{ form.Contato1.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-user"></i> Contato 1
+                                </label>
+                                <input type="text" class="form-control" name="Contato1" id="{{ form.Contato1.id_for_label }}" value="{{ form.Contato1.value|default:'' }}">
+                                {% if form.Contato1.errors %}
+                                    <div class="text-danger small mt-1">{{ form.Contato1.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-lg-4 col-md-4 mb-3">
+                                <label for="{{ form.Contato2.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-user"></i> Contato 2
+                                </label>
+                                <input type="text" class="form-control" name="Contato2" id="{{ form.Contato2.id_for_label }}" value="{{ form.Contato2.value|default:'' }}">
+                                {% if form.Contato2.errors %}
+                                    <div class="text-danger small mt-1">{{ form.Contato2.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-lg-4 col-md-4 mb-3">
+                                <label for="{{ form.Contato3.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-user"></i> Contato 3
+                                </label>
+                                <input type="text" class="form-control" name="Contato3" id="{{ form.Contato3.id_for_label }}" value="{{ form.Contato3.value|default:'' }}">
+                                {% if form.Contato3.errors %}
+                                    <div class="text-danger small mt-1">{{ form.Contato3.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Informações Adicionais -->
+                        <div class="row mb-4 mt-4">
+                            <div class="col-12">
+                                <h6 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-info-circle"></i> Informações Adicionais
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label for="{{ form.Informacao.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-sticky-note"></i> Informações
+                                </label>
+                                <textarea class="form-control" name="Informacao" id="{{ form.Informacao.id_for_label }}" rows="4">{{ form.Informacao.value|default:'' }}</textarea>
+                                {% if form.Informacao.errors %}
+                                    <div class="text-danger small mt-1">{{ form.Informacao.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Botões -->
+                        <div class="row mt-5">
+                            <div class="col-12">
+                                <hr class="mb-4">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'cadastros:cliente_list' %}" class="btn btn-secondary btn-lg">
+                                        <i class="fas fa-times"></i> Cancelar
+                                    </a>
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-save"></i> {{ action }} Cliente
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+/* Estilos customizados para melhor aparência */
+.form-label {
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.form-control, .form-select {
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.95rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.card {
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.text-primary {
+    color: #0d6efd !important;
+}
+
+.border-bottom {
+    border-bottom: 2px solid #dee2e6 !important;
+}
+
+.btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+}
+
+/* Responsividade melhorada */
+@media (max-width: 768px) {
+    .col-lg-2 {
+        margin-bottom: 1rem;
+    }
+    
+    .btn-lg {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .d-flex.justify-content-between {
+        flex-direction: column;
+    }
+}
+</style>
+
+<script>
+// Script simplificado apenas para navegação
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Formulário de cliente carregado');
+});
+</script>
+
 {% endblock %}
